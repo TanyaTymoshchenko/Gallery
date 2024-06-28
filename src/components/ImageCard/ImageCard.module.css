@@ -1,0 +1,25 @@
+.image-container {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.image-container:hover image {
+    transform: scale(1.1);
+}
+
+@media screen and (min-width: 768px) {
+    .image-container {
+        width: 300px;
+    }
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
