@@ -4,13 +4,19 @@ import SearchBar from "./components/SearchBar/SearchBar";
 import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
-import LoadMoreButton from "./components/LoadMoreButton/LoadMoreButton";
+import LoadMoreBtn from "./components/LoadMoreButton/LoadMoreButton";
 import ImageModal from "./components/ImageModal/ImageModal";
 import getImages from "./api";
-import handleLoadMoreScroll from "./scroll";
+import {
+  Images,
+  ModalData,
+  OnOpenModalCallback,
+  StandardCallBack,
+} from "./types";
+import { HandleSubmitCallbackType } from "./components/SearchBar/SearchBar.types";
 
 export default function App() {
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState<Images>([]);
   const [isEmpty, setIsEmpty] = useState(false);
   const [currentQuery, setCurrentQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,19 +24,30 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
-  const [modalData, setModalData] = useState({});
-  const galleryItemRef = useRef();
+  const [modalData, setModalData] = useState<ModalData>({});
 
-  function openModal(modalData) {
+
+  const openModal: OnOpenModalCallback = (modalData): void => {
     setIsOpen(true);
     document.body.style.overflow = "hidden";
     setModalData(modalData);
-  }
+  };
 
-  function closeModal() {
+  const closeModal: StandardCallBack = () : void => {
     setIsOpen(false);
     document.body.style.overflow = "visible";
-  }
+  };
+
+  const handleSubmit: HandleSubmitCallbackType = (query):  void => {
+    setIsEmpty(false);
+    setCurrentQuery(query);
+    setCurrentPage(1);
+    setImages([]);
+  };
+
+  const handleLoadMoreBtnClick: StandardCallBack = (): void => {
+    setCurrentPage(currentPage + 1);
+  };
 
   useEffect(() => {
     async function handleSearch() {
@@ -59,42 +76,22 @@ export default function App() {
     handleSearch();
   }, [currentQuery, currentPage]);
 
-  useEffect(() => {
-    if (currentPage === 1) return;
-    handleLoadMoreScroll(galleryItemRef.current);
-  }, [images, currentPage]);
-
-  function handleSubmit(query) {
-    setIsEmpty(false);
-    setCurrentQuery(query);
-    setCurrentPage(1);
-    setImages([]);
-  }
-
-  function handleLoadMoreBtnClick() {
-    setCurrentPage(currentPage + 1);
-  }
-
   return (
     <div>
       <SearchBar onSubmit={handleSubmit} />
       <main>
         <Container notHeader>
           {!images.length && !isLoading && !isEmpty && (
-            <p>Let's get started!</p>
+            <p>Let's get started! 🔍 </p>
           )}
-          {isEmpty && <p> Sorry, no images found!</p>}
+          {isEmpty && <p>Sorry, but no images found! Try again a new query!</p>}
           {images.length > 0 && (
-            <ImageGallery
-              ref={galleryItemRef}
-              images={images}
-              onOpenModal={openModal}
-            />
+            <ImageGallery images={images} onOpenModal={openModal} />
           )}
           {isLoading && <Loader />}
           {error && <ErrorMessage />}
           {images.length > 0 && !isLoading && currentPage !== totalPages && (
-            <LoadMoreButton onClick={handleLoadMoreBtnClick} />
+            <LoadMoreBtn onClick={handleLoadMoreBtnClick} />
           )}
           {modalIsOpen && (
             <ImageModal
@@ -108,3 +105,4 @@ export default function App() {
     </div>
   );
 }
+

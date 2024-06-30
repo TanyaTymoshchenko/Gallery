@@ -1,18 +1,36 @@
+import { FormEvent } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Container from "../Container/Container";
 import css from "./SearchBar.module.css";
+import { SeacrhBarPropTypes } from "./SearchBar.types";
+import { StandardCallBack } from "../../types";
 
-const notify = () =>
-  toast.error(<div>Field should not be empty!</div>, {
+let toastId: string;
+
+const notify: StandardCallBack = (): void => {
+  toastId = toast(<div onClick={closeToast}>Fields should not be empty</div>, {
     duration: 2000,
     position: "top-right",
+    icon: "❗",
   });
+};
 
-export default function SearchBar({ onSubmit }) {
-  function handleSubmit(event) {
+const closeToast: StandardCallBack = (): void => {
+  toast.remove(toastId);
+};
+
+
+interface Target extends EventTarget {
+  searchTarget: HTMLInputElement;
+}
+
+
+export default function SearchBar({ onSubmit }: SeacrhBarPropTypes) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const searchValue =
-      event.currentTarget.elements.searchTarget.value.trim("");
+    const target = event.target as Target;
+    const searchValue = 
+      target.searchTarget.value.trim().toLowerCase();
     if (searchValue === "") {
       notify();
     } else {
@@ -22,7 +40,7 @@ export default function SearchBar({ onSubmit }) {
   }
 
   return (
-    <header className={css.header}>
+    <header className={css.header} onClick={closeToast}>
       <Container>
         <form className={css.form} onSubmit={handleSubmit}>
           <input
@@ -31,14 +49,13 @@ export default function SearchBar({ onSubmit }) {
             type="text"
             autoComplete="off"
             autoFocus
-            placeholder="Search images and photos..."
+            placeholder="Search images and photos"
           />
           <button className={css.button} type="submit">
             Search
           </button>
           <Toaster
             toastOptions={{
-              className: css["toast"],
               style: {
                 color: " #403234",
                 backgroundColor: "#e2c2b3",
