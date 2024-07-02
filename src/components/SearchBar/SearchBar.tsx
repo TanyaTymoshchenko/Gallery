@@ -20,7 +20,7 @@ const closeToast: StandardCallBack = (): void => {
 };
 
 
-interface Target extends EventTarget {
+interface Target extends  HTMLFormElement {
   searchTarget: HTMLInputElement;
 }
 
